@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import BtnSpinner from "../components/BtnSpinner";
+import { AiFillCamera } from "react-icons/ai";
+import { upload } from "../util/helper";
+import axios from "../util/axios";
 
 const Register = () => {
   const navigate = useNavigate();
+
+  const [file, setFile] = useState<any>(null);
 
   const [username, setUsername] = useState("");
 
@@ -21,8 +26,24 @@ const Register = () => {
     setLoading(true);
 
     try {
+      let profileUrl = "";
+
+      if (file) profileUrl = await upload(file);
+
+      await axios.post("/auth/register", {
+        username,
+        email,
+        password,
+        profileUrl,
+      });
+
+      setLoading(false);
+
+      navigate("/login");
     } catch (err) {
       setLoading(false);
+
+      console.log(err);
 
       setError(true);
     }
@@ -42,6 +63,29 @@ const Register = () => {
         </div>
 
         <div className="w-full bg-white flex flex-col space-y-5 p-5 rounded-lg overflow-hidden">
+          <input
+            style={{ display: "none" }}
+            type="file"
+            id="file"
+            accept="image/*"
+            onChange={(e) => setFile(e?.target?.files?.[0])}
+          />
+
+          <div className="relative w-10 h-10 mx-auto">
+            <img
+              className="absolute w-full h-full rounded-full object-cover"
+              src={file ? URL.createObjectURL(file) : "/no-image.jpeg"}
+              alt=""
+            />
+
+            <label
+              className="absolute bottom-0 -right-2 text-[#1775ee] cursor-pointer"
+              htmlFor="file"
+            >
+              <AiFillCamera size={20} />
+            </label>
+          </div>
+
           <input
             className="py-2 px-4 border border-[gray] outline-none rounded text-sm sm:text-base"
             value={username}
