@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import BtnSpinner from "../components/BtnSpinner";
+import { useAuth } from "../context/AuthProvider";
+import axios from "../util/axios";
 
 const Login = () => {
   const navigate = useNavigate();
+
+  const auth = useAuth();
 
   const [username, setUsername] = useState("");
 
@@ -19,6 +23,20 @@ const Login = () => {
     setLoading(true);
 
     try {
+      const res = await axios.post(
+        "/auth/signin",
+        { username, password },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+
+      auth?.setUser(res.data);
+
+      setLoading(false);
+
+      navigate("/", { replace: true });
     } catch (err) {
       setLoading(false);
 
@@ -56,7 +74,8 @@ const Login = () => {
           />
 
           <button
-            className="bg-[#1775ee] flex items-center justify-center p-2 text-white rounded text-sm font-bold sm:text-base"
+            className="bg-[#1775ee] flex items-center justify-center p-2 text-white rounded text-sm font-bold sm:text-base disabled:cursor-not-allowed"
+            disabled={loading || !username.trim() || !password.trim()}
             onClick={loginhandler}
           >
             {loading ? <BtnSpinner /> : <p>Sign In</p>}

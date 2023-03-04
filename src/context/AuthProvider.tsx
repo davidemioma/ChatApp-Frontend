@@ -9,8 +9,8 @@ interface AuthUser {
 }
 
 interface AuthProps {
-  auth: AuthUser | null;
-  setAuth: React.Dispatch<React.SetStateAction<AuthUser | null>>;
+  user: AuthUser | null;
+  setUser: React.Dispatch<React.SetStateAction<AuthUser | null>>;
 }
 
 interface ChildrenProps {
@@ -22,10 +22,10 @@ export const AuthContext = createContext<AuthProps | null>(null);
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: ChildrenProps) => {
-  const [auth, setAuth] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   return (
-    <AuthContext.Provider value={{ auth, setAuth }}>
+    <AuthContext.Provider value={{ user, setUser }}>
       {children}
     </AuthContext.Provider>
   );

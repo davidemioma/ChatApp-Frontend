@@ -111,8 +111,11 @@ const Register = () => {
           />
 
           <button
-            className="bg-[#1775ee] flex items-center justify-center p-2 text-white rounded text-sm font-bold sm:text-base"
+            className="bg-[#1775ee] flex items-center justify-center p-2 text-white rounded text-sm font-bold sm:text-base disabled:cursor-not-allowed"
             onClick={registerhandler}
+            disabled={
+              loading || !username.trim() || !password.trim() || !email.trim()
+            }
           >
             {loading ? <BtnSpinner /> : <p>Sign Up</p>}
           </button>
