@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import PersistsLogin from "./components/PersistsLogin";
 import RequireAuth from "./components/RequireAuth";
 import Chat from "./pages/Chat";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
@@ -15,7 +16,9 @@ const App = () => {
 
       <Route element={<PersistsLogin />}>
         <Route element={<RequireAuth />}>
-          <Route path="/" element={<Chat />} />
+          <Route path="/" element={<Home />} />
+
+          <Route path="/chat" element={<Chat />} />
         </Route>
       </Route>
     </Routes>
