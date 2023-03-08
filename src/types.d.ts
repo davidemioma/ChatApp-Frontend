@@ -3,3 +3,8 @@ export interface UserProps {
   profileUrl: string;
   username: string;
 }
+
+export interface ConvoProps {
+  _id: string;
+  members: string[];
+}
