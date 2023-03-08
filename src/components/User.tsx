@@ -2,8 +2,6 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { UserProps } from "../types";
-import { useQuery } from "@tanstack/react-query";
-import axios from "../util/axios";
 import { useAuth } from "../context/AuthProvider";
 
 interface Props {
@@ -17,30 +15,17 @@ const User = ({ user }: Props) => {
 
   const axiosPrivate = useAxiosPrivate();
 
-  const { isLoading, data } = useQuery({
-    queryKey: ["conversation"],
-    queryFn: () => {
-      return axios
-        .get(`/conversation/check?myId=${auth?.user?._id}&userId=${user._id}`)
-        .then((res) => {
-          return res.data;
-        });
-    },
-  });
-
   const createConversation = async () => {
     try {
-      if (!data) {
-        await axiosPrivate.post("/conversation", {
-          senderId: auth?.user?._id,
-          recieverId: user._id,
-        });
-
-        navigate("/chat");
-      }
+      await axiosPrivate.post("/conversation", {
+        senderId: auth?.user?._id,
+        recieverId: user._id,
+      });
 
       navigate("/chat");
-    } catch (err) {}
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -58,8 +43,7 @@ const User = ({ user }: Props) => {
       </div>
 
       <button
-        className="bg-[#1775ee] flex items-center justify-center px-2 py-1 text-white rounded text-sm font-bold disabled:cursor-not-allowed"
-        disabled={isLoading}
+        className="bg-[#1775ee] flex items-center justify-center px-2 py-1 text-white rounded text-sm font-bold"
         onClick={createConversation}
       >
         Message

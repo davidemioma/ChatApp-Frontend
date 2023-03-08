@@ -8,3 +8,11 @@ export interface ConvoProps {
   _id: string;
   members: string[];
 }
+
+export interface MessageProps {
+  _id: string;
+  conversationId: string;
+  senderId: string;
+  text: string;
+  createdAt: string;
+}

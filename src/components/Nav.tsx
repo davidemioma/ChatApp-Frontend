@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
 import axios from "../util/axios";
 
@@ -25,7 +25,9 @@ const Nav = () => {
   return (
     <div className="bg-[#1775ee] w-screen h-10 flex items-center">
       <div className="w-full px-5 flex items-center justify-between">
-        <h1 className="text-white text-2xl font-bold">Messenger</h1>
+        <Link to="/">
+          <h1 className="text-white text-2xl font-bold">Messenger</h1>
+        </Link>
 
         <div className="flex items-center space-x-3 text-white text-sm">
           <div className="flex items-center space-x-1">

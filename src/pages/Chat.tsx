@@ -5,7 +5,7 @@ import Message from "../components/Message";
 import { BiHappyAlt } from "react-icons/bi";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { useAuth } from "../context/AuthProvider";
-import { ConvoProps } from "../types";
+import { ConvoProps, MessageProps } from "../types";
 
 const Chat = () => {
   const auth = useAuth();
@@ -15,6 +15,34 @@ const Chat = () => {
   const [text, setText] = useState("");
 
   const [conversations, setConversations] = useState<ConvoProps[]>([]);
+
+  const [messages, setMessages] = useState<MessageProps[]>([]);
+
+  const [currentConvo, setCurrentConvo] = useState<ConvoProps | null>(null);
+
+  const [loading, setLoading] = useState(false);
+
+  const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setLoading(true);
+
+    try {
+      await axiosPrivate.post("/messages", {
+        conversationId: currentConvo?._id,
+        senderId: auth?.user?._id,
+        text,
+      });
+
+      setText("");
+
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+
+      console.log(err);
+    }
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -38,6 +66,28 @@ const Chat = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchMessages = async () => {
+      try {
+        const res = await axiosPrivate.get(`/messages/${currentConvo?._id}`, {
+          signal: controller.signal,
+        });
+
+        setMessages(res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchMessages();
+
+    return () => {
+      controller.abort();
+    };
+  }, [currentConvo]);
+
   return (
     <>
       <Nav />
@@ -45,32 +95,32 @@ const Chat = () => {
       <div className="w-screen flex">
         <div className="w-20 md:w-60 lg:w-78 h-[calc(100vh-40px)] flex flex-col space-y-2 p-5 border border-l overflow-y-scroll overflow-x-hidden">
           {conversations.map((conversation) => (
-            <Conversation key={conversation._id} conversation={conversation} />
+            <Conversation
+              key={conversation._id}
+              conversation={conversation}
+              current={conversation._id === currentConvo?._id}
+              setCurrentConvo={setCurrentConvo}
+            />
           ))}
         </div>
 
-        {conversations && (
+        {currentConvo && (
           <div className="relative w-full h-[calc(100vh-40px)]">
             <div className="h-[calc(100vh-96px)] space-y-4 py-7 px-5 sm:px-7 overflow-y-scroll">
-              <Message myMessage />
-
-              <Message />
-
-              <Message myMessage />
-
-              <Message />
-
-              <Message myMessage />
-
-              <Message />
-
-              <Message myMessage />
-
-              <Message />
+              {messages.map((message) => (
+                <Message
+                  key={message._id}
+                  message={message}
+                  myMessage={message.senderId === auth?.user?._id}
+                />
+              ))}
             </div>
 
-            <div className="absolute bottom-0 w-full h-14 ">
-              <form className="flex items-center space-x-2 px-4">
+            <div className="absolute bottom-0 w-full h-14">
+              <form
+                onSubmit={sendMessage}
+                className="flex items-center space-x-2 px-2"
+              >
                 <div className="flex flex-1 items-center space-x-2 rounded-full bg-gray-100 px-4 py-1.5">
                   <input
                     className="flex-1 bg-transparent outline-none"
@@ -84,10 +134,11 @@ const Chat = () => {
                 </div>
 
                 <button
-                  className="font-semibold text-[#1775ee] disabled:cursor-not-allowed"
+                  className="hidden sm:inline font-semibold text-[#1775ee] disabled:cursor-not-allowed"
+                  disabled={loading}
                   type="submit"
                 >
-                  Send
+                  {loading ? "Sending..." : "Send"}
                 </button>
               </form>
             </div>
