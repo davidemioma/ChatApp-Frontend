@@ -31,34 +31,6 @@ const Chat = () => {
 
   const scrollRef = useRef<any>();
 
-  const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    setLoading(true);
-
-    try {
-      mySocket?.socket?.emit("sendmessage", {
-        senderId: auth?.user?._id,
-        reciverId: currentConvo?.members.find((id) => id !== auth?.user?._id),
-        text,
-      });
-
-      await axiosPrivate.post("/messages", {
-        conversationId: currentConvo?._id,
-        senderId: auth?.user?._id,
-        text,
-      });
-
-      setText("");
-
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-
-      console.log(err);
-    }
-  };
-
   useEffect(() => {
     mySocket?.socket?.on("getMessage", (data: any) => {
       setArrivalMessage({
@@ -98,11 +70,13 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    // const controller = new AbortController();
+    const controller = new AbortController();
 
     const fetchMessages = async () => {
       try {
-        const res = await axiosPrivate.get(`/messages/${currentConvo?._id}`);
+        const res = await axiosPrivate.get(`/messages/${currentConvo?._id}`, {
+          signal: controller.signal,
+        });
 
         setMessages(res.data);
       } catch (err) {
@@ -112,10 +86,38 @@ const Chat = () => {
 
     fetchMessages();
 
-    // return () => {
-    //   controller.abort();
-    // };
-  }, [currentConvo, arrivalMessage]);
+    return () => {
+      controller.abort();
+    };
+  }, [currentConvo]);
+
+  const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setLoading(true);
+
+    try {
+      mySocket?.socket?.emit("sendmessage", {
+        senderId: auth?.user?._id,
+        reciverId: currentConvo?.members.find((id) => id !== auth?.user?._id),
+        text,
+      });
+
+      await axiosPrivate.post("/messages", {
+        conversationId: currentConvo?._id,
+        senderId: auth?.user?._id,
+        text,
+      });
+
+      setText("");
+
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+
+      console.log(err);
+    }
+  };
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
