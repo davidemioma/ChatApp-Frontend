@@ -5,10 +5,13 @@ import Message from "../components/Message";
 import { BiHappyAlt } from "react-icons/bi";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { useAuth } from "../context/AuthProvider";
-import { ConvoProps, MessageProps } from "../types";
+import { ArrivalProps, ConvoProps, MessageProps } from "../types";
+import { useSocket } from "../context/SocketProvider";
 
 const Chat = () => {
   const auth = useAuth();
+
+  const mySocket = useSocket();
 
   const axiosPrivate = useAxiosPrivate();
 
@@ -16,7 +19,11 @@ const Chat = () => {
 
   const [conversations, setConversations] = useState<ConvoProps[]>([]);
 
-  const [messages, setMessages] = useState<MessageProps[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
+
+  const [arrivalMessage, setArrivalMessage] = useState<ArrivalProps | null>(
+    null
+  );
 
   const [currentConvo, setCurrentConvo] = useState<ConvoProps | null>(null);
 
@@ -30,6 +37,12 @@ const Chat = () => {
     setLoading(true);
 
     try {
+      mySocket?.socket?.emit("sendmessage", {
+        senderId: auth?.user?._id,
+        reciverId: currentConvo?.members.find((id) => id !== auth?.user?._id),
+        text,
+      });
+
       await axiosPrivate.post("/messages", {
         conversationId: currentConvo?._id,
         senderId: auth?.user?._id,
@@ -45,6 +58,22 @@ const Chat = () => {
       console.log(err);
     }
   };
+
+  useEffect(() => {
+    mySocket?.socket?.on("getMessage", (data: any) => {
+      setArrivalMessage({
+        senderId: data.senderId,
+        text: data.text,
+        createdAt: Date.now(),
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    arrivalMessage &&
+      currentConvo?.members.includes(arrivalMessage.senderId) &&
+      setMessages((prev) => [...prev, arrivalMessage]);
+  }, [arrivalMessage, currentConvo]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -69,13 +98,11 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    const controller = new AbortController();
+    // const controller = new AbortController();
 
     const fetchMessages = async () => {
       try {
-        const res = await axiosPrivate.get(`/messages/${currentConvo?._id}`, {
-          signal: controller.signal,
-        });
+        const res = await axiosPrivate.get(`/messages/${currentConvo?._id}`);
 
         setMessages(res.data);
       } catch (err) {
@@ -85,10 +112,10 @@ const Chat = () => {
 
     fetchMessages();
 
-    return () => {
-      controller.abort();
-    };
-  }, [currentConvo]);
+    // return () => {
+    //   controller.abort();
+    // };
+  }, [currentConvo, arrivalMessage]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });

@@ -16,3 +16,9 @@ export interface MessageProps {
   text: string;
   createdAt: string;
 }
+
+export interface ArrivalProps {
+  senderId: string;
+  text: string;
+  createdAt: any;
+}
