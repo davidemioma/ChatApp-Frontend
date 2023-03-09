@@ -39,7 +39,7 @@ const User = ({ user }: Props) => {
           alt=""
         />
 
-        <p className="text-sm font-bold">{user.username}</p>
+        <p className="text-sm font-bold capitalize">{user.username}</p>
       </div>
 
       <button

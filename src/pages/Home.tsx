@@ -61,7 +61,15 @@ const Home = () => {
               ))}
           </div>
 
-          <div className="hidden md:inline bg-black w-full h-[calc(100vh-40px)]"></div>
+          <div className="hidden md:inline relative w-full h-[calc(100vh-40px)]">
+            <img
+              className="absolute top-0 w-full h-full object-cover"
+              src="/banner.jpeg"
+              alt=""
+            />
+
+            <div className="absolute top-0 bg-black/50 w-full h-full" />
+          </div>
         </div>
       )}
     </>

@@ -44,7 +44,7 @@ const Conversation = ({ conversation, current, setCurrentConvo }: Props) => {
       <p
         className={`${
           current && "text-[#1775ee]"
-        } w-[70px] md:w-full text-xs text-center md:text-left md:text-sm truncate whitespace-nowrap font-bold`}
+        } w-[70px] md:w-full text-xs text-center md:text-left md:text-sm truncate whitespace-nowrap font-bold capitalize`}
       >
         {data?.username}
       </p>

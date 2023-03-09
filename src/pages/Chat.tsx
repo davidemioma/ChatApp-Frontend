@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Conversation from "../components/Conversation";
 import Nav from "../components/Nav";
 import Message from "../components/Message";
@@ -21,6 +21,8 @@ const Chat = () => {
   const [currentConvo, setCurrentConvo] = useState<ConvoProps | null>(null);
 
   const [loading, setLoading] = useState(false);
+
+  const scrollRef = useRef<any>();
 
   const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -88,6 +90,10 @@ const Chat = () => {
     };
   }, [currentConvo]);
 
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   return (
     <>
       <Nav />
@@ -114,6 +120,8 @@ const Chat = () => {
                   myMessage={message.senderId === auth?.user?._id}
                 />
               ))}
+
+              <div ref={scrollRef} />
             </div>
 
             <div className="absolute bottom-0 w-full h-14">
